@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Complaint Details</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+</head>
+<body>
+  <h1>Complaint Details</h1>
+  <a href="/admin_dashboard">Back to Dashboard</a>
+  <h2>Complaint ID: <%= complaint._id %></h2>
+  <p><strong>Complaint Text:</strong> <%= complaint.complaintText %></p>
+  <p><strong>Submitted On:</strong> <%= complaint.timestamp %></p>
+</body>
+</html>

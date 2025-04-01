@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <a href="/logout">Logout</a>
+
+    <div class="complaints-section">
+        <h2>Pending Complaints</h2>
+        <div id="pending-complaints">
+            <% const pendingComplaints = complaints
+                .filter(c => c.status === 'pending')
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) %>
+            <% if (pendingComplaints.length > 0) { %>
+                <ul>
+                    <% pendingComplaints.forEach((complaint, index) => { %>
+                        <li class="complaint-item pending">
+                            <input type="checkbox" 
+                                   class="status-checkbox" 
+                                   data-id="<%= complaint._id %>" 
+                                   onclick="updateStatus(this)">
+                            <a href="/view_complaints/<%= complaint._id %>" class="complaint-link">
+                                <span class="complaint-date">
+                                    <%= new Date(complaint.timestamp).toLocaleDateString() %>
+                                </span>
+                                <span class="complaint-number">Complaint #<%= index + 1 %></span>
+                            </a>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } else { %>
+                <p>No pending complaints.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="complaints-section">
+        <h2>Resolved Complaints</h2>
+        <div id="resolved-complaints">
+            <% const resolvedComplaints = complaints
+                .filter(c => c.status === 'resolved')
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) %>
+            <% if (resolvedComplaints.length > 0) { %>
+                <ul>
+                    <% resolvedComplaints.forEach((complaint, index) => { %>
+                        <li class="complaint-item resolved">
+                            <input type="checkbox" 
+                                   class="status-checkbox" 
+                                   data-id="<%= complaint._id %>" 
+                                   checked 
+                                   onclick="updateStatus(this)">
+                            <a href="/view_complaints/<%= complaint._id %>" class="complaint-link">
+                                <span class="complaint-date">
+                                    <%= new Date(complaint.timestamp).toLocaleDateString() %>
+                                </span>
+                                <span class="complaint-number">Complaint #<%= index + 1 %></span>
+                            </a>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } else { %>
+                <p>No resolved complaints.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        async function updateStatus(checkbox) {
+            const complaintId = checkbox.dataset.id;
+            const status = checkbox.checked ? 'resolved' : 'pending';
+            
+            try {
+                const response = await fetch(`/update_status/${complaintId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to update status');
+                    checkbox.checked = !checkbox.checked;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating status');
+                checkbox.checked = !checkbox.checked;
+            }
+        }
+    </script>
+</body>
+</html>
