@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -26,20 +27,8 @@ app.use(bodyParser.json());
 
 const PORT = 8000;
 
-// RSA Key Generation (Run once to generate keys, then comment out)
-// if (!fs.existsSync('admin_public.pem') || !fs.existsSync('admin_private.pem')) {
-//     const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-//         modulusLength: 2048,
-//     });
-
-//     fs.writeFileSync('admin_public.pem', publicKey.export({ type: 'pkcs1', format: 'pem' }));
-//     fs.writeFileSync('admin_private.pem', privateKey.export({ type: 'pkcs1', format: 'pem' }));
-//     console.log('RSA keys generated and saved to files.');
-// }
-
-// Only generate keys if they don't exist AND we're in development
-if (process.env.NODE_ENV === 'development' && 
-    (!fs.existsSync('admin_public.pem') || !fs.existsSync('admin_private.pem'))) {
+// RSA Key Generation (generate if missing)
+if (!fs.existsSync('admin_public.pem') || !fs.existsSync('admin_private.pem')) {
     const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
         modulusLength: 2048,
         publicKeyEncoding: {
@@ -57,7 +46,7 @@ if (process.env.NODE_ENV === 'development' &&
     console.log('RSA keys generated and saved to files.');
 }
 
-// Load Admin's RSA Keys
+// Now it's safe to read the keys
 const publicKey = fs.readFileSync('admin_public.pem', 'utf8');
 const privateKey = fs.readFileSync('admin_private.pem', 'utf8');
 
@@ -112,7 +101,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // MongoDB Connection
-const mongoURI = 'mongodb+srv://245122749009:245122749009@cluster0.fdcfx.mongodb.net/miniproject?retryWrites=true&w=majority';
+const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
     .catch((error) => console.error('MongoDB connection error:', error));
@@ -363,28 +352,28 @@ app.post('/update_status/:complaintId', async (req, res) => {
 });
 
 
-// async function createAdminUser() {
-//     try {
-//         const adminExists = await User.findOne({ username: 'admin' });
-//         if (!adminExists) {
-//             const hashedPassword = await bcrypt.hash('admin123', 10);
-//             const adminUser = new User({
-//                 username: 'admin',
-//                 email: 'admin@gmail.com',
-//                 password: hashedPassword,
-//                 isAdmin: true
-//             });
-//             await adminUser.save();
-//             console.log('Admin user created successfully');
-//         }
-//     } catch (error) {
-//         console.error('Error creating admin user:', error);
-//     }
-// }
+async function createAdminUser() {
+    try {
+        const adminExists = await User.findOne({ username: 'admin' });
+        if (!adminExists) {
+            const hashedPassword = await bcrypt.hash('admin123', 10);
+            const adminUser = new User({
+                username: 'admin',
+                email: 'admin@gmail.com',
+                password: hashedPassword,
+                isAdmin: true
+            });
+            await adminUser.save();
+            console.log('Admin user created successfully');
+        }
+    } catch (error) {
+        console.error('Error creating admin user:', error);
+    }
+}
 
 
 // Start the Server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    //createAdminUser();
+    createAdminUser();
 });
