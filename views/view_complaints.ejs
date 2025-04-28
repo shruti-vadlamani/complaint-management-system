@@ -1,15 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Complaint Details</title>
-  <link rel="stylesheet" href="/styles/styles.css">
+    <meta charset="UTF-8">
+    <title>View Complaint - Complaint Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .complaint-details {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--background-color);
+        }
+
+        .detail-label {
+            width: 150px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        .priority-high { color: var(--error-color); font-weight: 600; }
+        .priority-medium { color: var(--warning-color); font-weight: 500; }
+        .priority-low { color: var(--success-color); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .status-pending { background: var(--warning-color); }
+        .status-resolved { background: var(--success-color); }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-  <h1>Complaint Details</h1>
-  <a href="/admin_dashboard">Back to Dashboard</a>
-  <h2>Complaint ID: <%= complaint._id %></h2>
-  <p><strong>Complaint Text:</strong> <%= complaint.complaintText %></p>
-  <p><strong>Submitted On:</strong> <%= complaint.timestamp %></p>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Complaint Management</a>
+            <div class="navbar-links">
+                <a href="/admin_dashboard" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Complaint Details</h1>
+        <div class="complaint-details">
+            <div class="detail-row">
+                <div class="detail-label">Type</div>
+                <div class="detail-value"><%= complaint.type %></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Department</div>
+                <div class="detail-value"><%= complaint.department %></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Priority</div>
+                <div class="detail-value priority-<%= complaint.priority.toLowerCase() %>">
+                    <%= complaint.priority %>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                    <span class="status-badge status-<%= complaint.status %>">
+                        <%= complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1) %>
+                    </span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Submitted On</div>
+                <div class="detail-value">
+                    <%= new Date(complaint.timestamp).toLocaleString() %>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Complaint</div>
+                <div class="detail-value" style="white-space: pre-wrap;">
+                    <%= complaint.complaintText %>
+                </div>
+            </div>
+        </div>
+        <a href="/admin_dashboard" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <footer>
+        <p>&copy; <span id="year"></span> Complaint Management System</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>

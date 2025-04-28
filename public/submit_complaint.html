@@ -1,16 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Submit Complaint</title>
-  <link rel="stylesheet" href="/styles/styles.css">
+    <meta charset="UTF-8">
+    <title>Submit Complaint - Complaint Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Submit a Complaint</h1>
-  <form action="/submit_complaint" method="POST">
-    <label>Complaint Text:</label><br>
-    <textarea name="complaintText" required></textarea><br>
-    <button type="submit">Submit</button>
-  </form>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Complaint Management</a>
+            <div class="navbar-links">
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Submit a Complaint</h1>
+        <form action="/submit_complaint" method="POST">
+            <div class="form-group">
+                <label for="title">Complaint Title</label>
+                <input type="text" id="title" name="title" required placeholder="Enter a brief title for your complaint...">
+            </div>
+
+            <div class="form-group">
+                <label for="type">Complaint Type</label>
+                <select id="type" name="type" required>
+                    <option value="">Select Type</option>
+                    <option value="Technical">Technical</option>
+                    <option value="Service">Service</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority Level</label>
+                <select id="priority" name="priority" required>
+                    <option value="">Select Priority</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" name="department" required>
+                    <option value="">Select Department</option>
+                    <option value="IT">IT</option>
+                    <option value="Facilities">Facilities</option>
+                    <option value="HR">HR</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="complaintText">Complaint Details</label>
+                <textarea id="complaintText" name="complaintText" required placeholder="Please provide detailed information about your complaint..."></textarea>
+            </div>
+
+            <button type="submit" class="btn">Submit Complaint</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; <span id="year"></span> Complaint Management System</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>

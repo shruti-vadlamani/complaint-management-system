@@ -2,98 +2,275 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - Complaint Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .priority-high { color: var(--error-color); font-weight: 600; }
+        .priority-medium { color: var(--warning-color); font-weight: 500; }
+        .priority-low { color: var(--success-color); }
+        
+        .complaint-card {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .complaint-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .complaint-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .complaint-type {
+            background: var(--primary-light);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .complaint-department {
+            background: var(--background-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .complaint-content {
+            margin: 1rem 0;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .complaint-content.expanded {
+            display: block;
+        }
+
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-toggle label {
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .status-resolved {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .complaints-section {
+            margin-bottom: 3rem;
+        }
+
+        .complaint-title {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0;
+            flex: 1;
+        }
+
+        .complaint-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .complaint-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .view-details-btn {
+            background: var(--primary-light);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .view-details-btn:hover {
+            background: var(--primary-color);
+        }
+    </style>
 </head>
 <body>
-    <h1>Admin Dashboard</h1>
-    <a href="/logout">Logout</a>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Complaint Management</a>
+            <div class="navbar-links">
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
 
-    <div class="complaints-section">
-        <h2>Pending Complaints</h2>
-        <div id="pending-complaints">
-            <% const pendingComplaints = complaints
-                .filter(c => c.status === 'pending')
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) %>
-            <% if (pendingComplaints.length > 0) { %>
-                <ul>
-                    <% pendingComplaints.forEach((complaint, index) => { %>
-                        <li class="complaint-item pending">
-                            <input type="checkbox" 
-                                   class="status-checkbox" 
-                                   data-id="<%= complaint._id %>" 
-                                   onclick="updateStatus(this)">
-                            <a href="/view_complaints/<%= complaint._id %>" class="complaint-link">
-                                <span class="complaint-date">
-                                    <%= new Date(complaint.timestamp).toLocaleDateString() %>
-                                </span>
-                                <span class="complaint-number">Complaint #<%= index + 1 %></span>
-                            </a>
-                        </li>
-                    <% }) %>
-                </ul>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="complaints-section">
+            <h2 class="section-title">Pending Complaints</h2>
+            <% const pendingComplaints = complaints.filter(c => c.status === 'pending'); %>
+            <% if (pendingComplaints.length === 0) { %>
+                <p style="text-align: center; color: var(--text-secondary);">No pending complaints.</p>
             <% } else { %>
-                <p>No pending complaints.</p>
+                <% pendingComplaints.forEach(function(complaint) { %>
+                    <div class="complaint-card" id="complaint-<%= complaint._id %>">
+                        <div class="complaint-header">
+                            <h3 class="complaint-title"><%= complaint.title %></h3>
+                            <div class="complaint-actions">
+                                <a href="/view_complaints/<%= complaint._id %>" class="view-details-btn">View Details</a>
+                                <div class="status-toggle">
+                                    <label class="status-badge status-<%= complaint.status %>">
+                                        <%= complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1) %>
+                                    </label>
+                                    <input type="checkbox" 
+                                           class="status-checkbox" 
+                                           data-complaint-id="<%= complaint._id %>"
+                                           <%= complaint.status === 'resolved' ? 'checked' : '' %>>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="complaint-meta">
+                            <span class="complaint-type"><%= complaint.type %></span>
+                            <span class="complaint-department"><%= complaint.department %></span>
+                            <span class="priority-<%= complaint.priority ? complaint.priority.toLowerCase() : 'medium' %>">
+                                Priority: <%= complaint.priority || 'Medium' %>
+                            </span>
+                        </div>
+                        <div class="complaint-date">
+                            Submitted on: <%= new Date(complaint.timestamp).toLocaleString() %>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+
+        <div class="complaints-section">
+            <h2 class="section-title">Resolved Complaints</h2>
+            <% const resolvedComplaints = complaints.filter(c => c.status === 'resolved'); %>
+            <% if (resolvedComplaints.length === 0) { %>
+                <p style="text-align: center; color: var(--text-secondary);">No resolved complaints.</p>
+            <% } else { %>
+                <% resolvedComplaints.forEach(function(complaint) { %>
+                    <div class="complaint-card" id="complaint-<%= complaint._id %>">
+                        <div class="complaint-header">
+                            <h3 class="complaint-title"><%= complaint.title %></h3>
+                            <div class="complaint-actions">
+                                <a href="/view_complaints/<%= complaint._id %>" class="view-details-btn">View Details</a>
+                                <div class="status-toggle">
+                                    <label class="status-badge status-<%= complaint.status %>">
+                                        <%= complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1) %>
+                                    </label>
+                                    <input type="checkbox" 
+                                           class="status-checkbox" 
+                                           data-complaint-id="<%= complaint._id %>"
+                                           <%= complaint.status === 'resolved' ? 'checked' : '' %>>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="complaint-meta">
+                            <span class="complaint-type"><%= complaint.type %></span>
+                            <span class="complaint-department"><%= complaint.department %></span>
+                            <span class="priority-<%= complaint.priority ? complaint.priority.toLowerCase() : 'medium' %>">
+                                Priority: <%= complaint.priority || 'Medium' %>
+                            </span>
+                        </div>
+                        <div class="complaint-date">
+                            Submitted on: <%= new Date(complaint.timestamp).toLocaleString() %>
+                        </div>
+                    </div>
+                <% }); %>
             <% } %>
         </div>
     </div>
 
-    <div class="complaints-section">
-        <h2>Resolved Complaints</h2>
-        <div id="resolved-complaints">
-            <% const resolvedComplaints = complaints
-                .filter(c => c.status === 'resolved')
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) %>
-            <% if (resolvedComplaints.length > 0) { %>
-                <ul>
-                    <% resolvedComplaints.forEach((complaint, index) => { %>
-                        <li class="complaint-item resolved">
-                            <input type="checkbox" 
-                                   class="status-checkbox" 
-                                   data-id="<%= complaint._id %>" 
-                                   checked 
-                                   onclick="updateStatus(this)">
-                            <a href="/view_complaints/<%= complaint._id %>" class="complaint-link">
-                                <span class="complaint-date">
-                                    <%= new Date(complaint.timestamp).toLocaleDateString() %>
-                                </span>
-                                <span class="complaint-number">Complaint #<%= index + 1 %></span>
-                            </a>
-                        </li>
-                    <% }) %>
-                </ul>
-            <% } else { %>
-                <p>No resolved complaints.</p>
-            <% } %>
-        </div>
-    </div>
+    <footer>
+        <p>&copy; <span id="year"></span> Complaint Management System</p>
+    </footer>
 
     <script>
-        async function updateStatus(checkbox) {
-            const complaintId = checkbox.dataset.id;
-            const status = checkbox.checked ? 'resolved' : 'pending';
-            
-            try {
-                const response = await fetch(`/update_status/${complaintId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ status })
-                });
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Handle status toggle
+        document.querySelectorAll('.status-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', async function() {
+                const complaintId = this.dataset.complaintId;
+                const newStatus = this.checked ? 'resolved' : 'pending';
+                const complaintCard = document.getElementById(`complaint-${complaintId}`);
                 
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Failed to update status');
-                    checkbox.checked = !checkbox.checked;
+                try {
+                    const response = await fetch(`/update_status/${complaintId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+
+                    if (response.ok) {
+                        const statusBadge = this.closest('.status-toggle').querySelector('.status-badge');
+                        statusBadge.className = `status-badge status-${newStatus}`;
+                        statusBadge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                        
+                        // Move the complaint card to the appropriate section
+                        const targetSection = newStatus === 'resolved' 
+                            ? document.querySelector('.complaints-section:last-child')
+                            : document.querySelector('.complaints-section:first-child');
+                        
+                        targetSection.appendChild(complaintCard);
+                    } else {
+                        this.checked = !this.checked; // Revert the checkbox if update fails
+                    }
+                } catch (error) {
+                    console.error('Error updating status:', error);
+                    this.checked = !this.checked; // Revert the checkbox on error
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error updating status');
-                checkbox.checked = !checkbox.checked;
-            }
-        }
+            });
+        });
     </script>
 </body>
 </html>

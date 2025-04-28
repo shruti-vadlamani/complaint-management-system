@@ -119,7 +119,11 @@ const complaintSchema = new mongoose.Schema({
     encryptedComplaint: { type: String, required: true },
     encryptedAESKey: { type: String, required: true },
     iv: { type: String, required: true },
+    title: { type: String, required: true },
     status: { type: String, enum: ['pending', 'resolved'], default: 'pending' },
+    type: { type: String, enum: ['Technical', 'Service', 'Infrastructure'], required: true },
+    priority: { type: String, enum: ['High', 'Medium', 'Low'], required: true },
+    department: { type: String, enum: ['IT', 'Facilities', 'HR'], required: true },
     timestamp: { type: Date, default: Date.now },
 });
 
@@ -236,21 +240,24 @@ app.get('/submit_complaint', authenticateUser, (req, res) => {
 
 
 app.post('/submit_complaint', authenticateUser, async (req, res) => {
-    const { complaintText } = req.body;
+    const { title, complaintText, type, priority, department } = req.body;
     try {
-        if (!complaintText) {
-            return res.status(400).send('Complaint text is required.');
+        if (!title || !complaintText || !type || !priority || !department) {
+            return res.status(400).send('All fields are required.');
         }
         const encryptedData = encryptComplaint(complaintText);
-        // Only save the encrypted data, not the plaintext complaintText
         const newComplaint = new Complaint({ 
             encryptedComplaint: encryptedData.encryptedComplaint,
             encryptedAESKey: encryptedData.encryptedAESKey,
-            iv: encryptedData.iv
+            iv: encryptedData.iv,
+            title,
+            type,
+            priority,
+            department
         });
         await newComplaint.save();
         res.status(201).send(`
-            <p>Complaint submitted securely. You will be redirected shortly...</p>
+            <p>Complaint submitted successfully. You will be redirected shortly...</p>
             <script>
                 setTimeout(() => {
                     window.location.href = '/index.html';
@@ -312,11 +319,16 @@ app.get('/view_complaints/:complaintId', authenticateAdmin, (req, res) => {
                     complaint.iv
                 );
 
-                // Pass complaint object with decrypted text to the view
+                // Pass all necessary complaint fields to the view
                 res.render('view_complaints', { 
                     complaint: { 
                         _id: complaint._id,
-                        complaintText: decryptedText,  // Add decrypted text
+                        title: complaint.title,
+                        type: complaint.type,
+                        priority: complaint.priority,
+                        department: complaint.department,
+                        status: complaint.status,
+                        complaintText: decryptedText,
                         timestamp: complaint.timestamp
                     }
                 });

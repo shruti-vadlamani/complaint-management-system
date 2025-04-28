@@ -2,25 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
-    <link rel="stylesheet" href="/styles/styles.css">
+    <title>Admin Login - Complaint Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Complaint Management</a>
+            <div class="navbar-links">
+                <a href="/login" class="btn btn-secondary">User Login</a>
+                <a href="/admin_login" class="btn">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
-        <h2>Admin Login</h2>
+        <h1>Admin Login</h1>
         <form action="/admin_login" method="POST">
             <div class="form-group">
-                <label for="username">Admin Username:</label>
+                <label for="username">Admin Username</label>
                 <input type="text" id="username" name="username" required>
             </div>
             <div class="form-group">
-                <label for="password">Password:</label>
+                <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn">Login as Admin</button>
+            <button type="submit" class="btn">Login</button>
         </form>
-        <p>Not an admin? <a href="/login">User Login</a></p>
     </div>
+
+    <footer>
+        <p>&copy; <span id="year"></span> Complaint Management System</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
